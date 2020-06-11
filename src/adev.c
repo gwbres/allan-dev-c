@@ -22,7 +22,7 @@ float mean (float *x, unsigned int size)
 	float acc = 0.f;
 	for (i=0; i<size; i++)
 		acc += x[i];
-	return acc / size;
+	return acc / (float)size;
 }
 
 void randnf (float *x, unsigned int size)
@@ -32,6 +32,23 @@ void randnf (float *x, unsigned int size)
 	{
 		x[i] = (float)rand()/RAND_MAX; 
 	}
+}
+
+float stdvar (float *x, unsigned int size)
+{
+	unsigned int i;
+	float m = mean(x, size);
+	float acc = 0.f;
+	for (i=0; i<size; i++)
+	{
+		acc += powf(x[i] - m,2);
+	}
+	return acc / (float)size;
+}
+
+float stddev (float *x, unsigned int size)
+{
+	return sqrtf(stdvar(x,size));
 }
 
 float avar (float **x, unsigned int size, unsigned int clust_size)

@@ -7,42 +7,50 @@
 
 int main (int argc, char **argv)
 {
+	const unsigned int N = 8192;
 	float *x, **clusters;
 	float *avar;
 	unsigned int i, j;
-	unsigned int tau;
+	unsigned int index = 0;
+	unsigned int n_clusters, clusters_size;
 	float xn, xnp1;
 	float acc;
 
-	x = (float*)malloc(128*sizeof(float));
-	avar = (float*)malloc(128*sizeof(float));
+	x = (float*)malloc(N*sizeof(float));
+	
+	avar = (float*)malloc(log2(N)*sizeof(float));
 
-	clusters = (float**)malloc(128*128*sizeof(float));
-	for (i=0; i<128; i++){
-		clusters[i] = (float*)malloc(128*sizeof(float));
-	}
-
-	randnf(x, 128);
-	array2csv("input.csv", x, 128);
-
-	/*  AVAR              */
-	// tau >= 1
-	for (tau=1; tau<128; tau++) // n_cluster 
+	clusters = (float**)malloc(N/2*sizeof(float)); // max. nb of cluster
+	for (i=0; i<N/2; i++) // max nb. of cluster
 	{
-		split(x, clusters, tau, 128/tau);
-		acc = 0.f;
-		for (j=0; j<128/tau-1; j++) // clust_size: j+1 must exist!
-		{
-			xn = mean(clusters[j], 128/tau);
-			xnp1 = mean(clusters[j+1], 128/tau);
-			acc += powf(xnp1-xn, 2);
-		}
-
-		acc /= (float)tau;
-		avar[tau] = 0.5 * acc;
+		clusters[i] = (float*)malloc(N*sizeof(float)); // largest cluster
 	}
 
-	array2csv("output.csv", avar, 128);
+	randnf(x, N);
+	array2csv("input.csv", x, N);
 
+	index = 0;
+
+	for (n_clusters=1; n_clusters < N/2; n_clusters *= 2)
+	{
+		clusters_size = N/n_clusters;
+		split(x, clusters, n_clusters, clusters_size); 
+		printf("n clusters: %d of size %d index %d\n", n_clusters, clusters_size, index);
+
+		acc = 0.f;
+		for (j=0; j<n_clusters-1; j++) 
+		{
+			printf("%d, ", j);
+			xn   = mean(clusters[j], clusters_size); 
+			xnp1 = mean(clusters[j+1], clusters_size); // adjacent cluster 
+			acc += powf(xnp1-xn, 2);
+		} printf("%d\n", n_clusters-1);
+
+		acc /= (float)n_clusters;
+		avar[index] = acc /2.0; 
+		index++;
+	}
+
+	array2csv("output.csv", avar, log2(N/2)-1);
 	return 0;
 }

@@ -24,9 +24,9 @@ int array2csv (const char *fp, float *array, unsigned int size)
 
 	for (i=0; i<size; i++)
 	{
-		fprintf(fd, "%f,",array[i]);
+		fprintf(fd, "%.6e,",array[i]);
 	}
-	fprintf(fd, "%f", array[i]);
+	fprintf(fd, "%.6e", array[i]);
 
 	fclose(fd);
 	return 0;

@@ -16,6 +16,13 @@ void randnf (float *x, unsigned int size);
 float mean (float *x, unsigned int size);
 
 /*
+	compute standard variance & deviance
+	of given *x data set
+*/
+float stdvar (float *x, unsigned int size);
+float stddev (float *x, unsigned int size);
+
+/*
 	AVAR
 */
 float avar (float **x, unsigned int size, unsigned int clust_size);
