@@ -5,8 +5,18 @@ CFLAGS += -lm
 
 RM = rm -rf
 
-avar: tests.c adev.c tools.c
-	$(CC) $(CFLAGS) -o $@ $< adev.c tools.c
+SRCS  = adev.c
+SRCS += tools.c
+
+all: avar
+
+OBJS = $(SRCS:.c:=.o)
+
+avar: tests.c $(SRCS)
+	$(CC) $(CFLAGS) -o $@ $< $(SRCS)
+
+%.o: %.c
+	$(CC) $(CFLAGS) -c $< -o $@ 
 
 .PHONY: clean
 clean:
