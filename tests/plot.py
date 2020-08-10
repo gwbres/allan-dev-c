@@ -39,23 +39,34 @@ def randf(n):
 	return result
 
 if __name__ == "__main__":
-	#x = readcsv("input.csv")
-	x = allantools.noise.brown(16384, b2=1.0)
-	x = allantools.noise.white(16384*100) # b2=1.0)
-	x = randf(16384*10)
+	x = readcsv("input.csv")
+	
+	#x = allantools.noise.brown(16384, b2=1.0)
+	#x = allantools.noise.white(16384*100) # b2=1.0)
+	#x = randf(16384*10)
 	x -= np.mean(x) # remove DC
-	#(taus, adevs, errors, ns) = allantools.adev(x)
+
+	# compute using model
+	(taus, adevs, errors, ns) = allantools.adev(x)
 	
+	# gui
 	fig = plt.figure()
-	ax = plt.subplot(121)
-	ax.plot(psd(x, 1024))
-	ax = plt.subplot(122)
-	#ax.plot(taus, np.power(adevs,2))
+	ax1 = plt.subplot(121)
 	plt.grid(True)
+	ax2 = plt.subplot(122)
+	plt.grid(True)
+
+	# input
+	ax1.plot(x)
 	
-	y = readcsv("output.csv")
-	#ax = plt.subplot(121)
-	#ax.plot(powers_of_two_axis(len(y)), y)
-	#ax.plot(powers_of_two_axis(len(y)), y[::-1])
-	plt.grid(True)
+	# model
+	ax2.semilogx(taus, 20*np.log10(adevs), '+-', label='model')
+	
+	# output
+	y = readcsv("output.csv") # avar
+	y = np.sqrt(y) # adev
+
+	taus = powers_of_two_axis (len(y))
+	ax2.semilogx(taus, 20*np.log10(y), '+-', label='output')
+	ax2.legend(loc='best')
 	plt.show()

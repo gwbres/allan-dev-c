@@ -1,40 +1,8 @@
-#include <math.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include "adev.h"
+#include <math.h>
 
-void tau_axis_pow2 (int *x, unsigned int size)
-{
-	unsigned int i;
-	for (i=0; i<size; i++)
-	{
-		x[i] = (int)roundf(powf(2,i));
-	}
-}
-
-void tau_axis_pow10 (int *x, unsigned int size)
-{
-	unsigned int i;
-	for (i=0; i<size; i++)
-	{
-		x[i] = (int)roundf(powf(10,i));
-	}
-}
-
-void tau_axis (int *x, unsigned size, uint8_t is_pow)
-{
-	unsigned int i;
-	if (is_pow & POWER2_TAU_AXIS)
-		tau_axis_pow2(x, size);
-
-	else if (is_pow & POWER10_TAU_AXIS)
-		tau_axis_pow10(x, size);
-	
-	else {
-		for (i=0; i<size; i++)
-			x[i] = i;
-	}
-}
+#include <adev.h>
 
 void split (
 	float *x, float **y, unsigned int n_cluster, unsigned int size
@@ -68,7 +36,7 @@ float stdvar (float *x, unsigned int size)
 	float acc = 0.f;
 	for (i=0; i<size; i++)
 	{
-		acc += powf(x[i] - m,2);
+		acc += powf(x[i] - m, 2);
 	}
 	return acc / (float)size;
 }
@@ -85,39 +53,43 @@ float avar_calc (float **x,
 ){
 	int i, max;
 	float acc;
-	float xn, xnp1, xnp2;
+	float xn, xnp1; //xnp2;
 
-	if (is_fractionnal)
-		max = n_clusters-2;
-	else
+	//if (is_fractionnal)
+	//	max = n_clusters-2;
+	//else
 		max = n_clusters-1;
 	
 	acc = 0.f;
 	for (i=0; i<max; i++) 
 	{
-		if (is_fractionnal)
-		xnp2 = mean(x[i+2], clust_size);
-		xnp1 = mean(x[i+1], clust_size);
-		xn   = mean(x[i],	  clust_size);
+	//	if (is_fractionnal)
+	//		xnp2 = mean(x[i+2], clust_size);
+		
+		//xnp1 = mean(x[i+1], clust_size);
+		//xn   = mean(x[i],	  clust_size);
 
-		if (is_fractionnal)
-			acc += powf(xnp2  -2*xnp1 + xn, 2);
-		else
-			acc += powf(xnp1 - xn, 2);
+	//	if (is_fractionnal)
+	//		acc += powf(xnp2  -2*xnp1 + xn, 2);
+	//	else
+			acc += powf(x[i+1] - x[i], 2);
 	}
 
-	if (is_fractionnal)
-		return acc /2.0 /((float)max+1.0) /(float)n_clusters;
-	else
+	//if (is_fractionnal)
+	//	return acc /((float)max+1.0) /(float)n_clusters /2.0;
+	//else
 		return acc /(float)n_clusters /2.0;
 }
 
-void avar_tau_pow2 (float *x, float *y, unsigned int size, uint8_t is_fractionnal) 
+void avar (float *x, float *y, unsigned int size, uint8_t is_fractionnal) 
 {
 	unsigned int n_clusters, clusters_size;
-	unsigned int index = (int)log2(size/2)+1; // last tau offset
-
 	float **clusters;
+	
+	// y[k] index
+	// starts from last tau offset and decrement to index=0
+	// only works for power of 2 axis
+	unsigned int index = (int)log2(size/2)+1; 
 
 	clusters = (float**)malloc(size*size*sizeof(float)); // max. nb of clusters
 	for (n_clusters=0; n_clusters < size; n_clusters++)
@@ -125,7 +97,12 @@ void avar_tau_pow2 (float *x, float *y, unsigned int size, uint8_t is_fractionna
 		// max. cluster size
 		clusters[n_clusters] = (float*)malloc(size*sizeof(float)); 
 	}
-
+	
+	y[0] = stdvar(x, size); // 1st tau offset is always std var
+	
+	// populate other tau offsets
+	// starting from largest value (=log2(n/2)+1)
+	// to smallest value (=1)
 	for (n_clusters=1; n_clusters <= size/2; n_clusters *= 2)
 	{
 		clusters_size = size / n_clusters;
@@ -134,17 +111,17 @@ void avar_tau_pow2 (float *x, float *y, unsigned int size, uint8_t is_fractionna
 		index--;
 	}
 
-	y[0] = stdvar(x, size); // 1st tau offset is always std var
-	
+	// free work structs
 	for (n_clusters=0; n_clusters < size; n_clusters++)
 		free(clusters[n_clusters]);
+
 	free(clusters);
 }
 
-void adev_tau_pow2 (float *x, float *y, unsigned int size, uint8_t is_fractionnal)
+void adev (float *x, float *y, unsigned int size, uint8_t is_fractionnal)
 {
-	unsigned int i;
-	avar_tau_pow2(x, y, size, is_fractionnal);
-	for (i=0; i<size; i++)
+	unsigned i;
+	avar (x, y, size, is_fractionnal);
+	for (i=0; i < size/2; i *= 2)
 		y[i] = sqrtf(y[i]);
 }
