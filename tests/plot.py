@@ -47,7 +47,7 @@ if __name__ == "__main__":
 	x -= np.mean(x) # remove DC
 
 	# compute using model
-	(taus, adevs, errors, ns) = allantools.adev(x)
+	(taus, adevs, errors, ns) = allantools.adev(x, data_type='freq')
 	
 	# gui
 	fig = plt.figure()
@@ -60,13 +60,16 @@ if __name__ == "__main__":
 	ax1.plot(x)
 	
 	# model
-	ax2.semilogx(taus, 20*np.log10(adevs), '+-', label='model')
+	ym = adevs
+	ym = np.power(ym, 2)
+	ym = 20 * np.log10(ym)
+	ax2.semilogx(taus, ym, '+-', label='model')
 	
 	# output
 	y = readcsv("output.csv") # avar
-	y = np.sqrt(y) # adev
-
+	y = 20 * np.log10(y) 
 	taus = powers_of_two_axis (len(y))
-	ax2.semilogx(taus, 20*np.log10(y), '+-', label='output')
+
+	ax2.semilogx(taus, y, '+-', label='output')
 	ax2.legend(loc='best')
 	plt.show()

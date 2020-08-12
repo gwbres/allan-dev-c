@@ -8,7 +8,7 @@
 
 int main (int argc, char **argv)
 {
-	const unsigned int N = 8192;
+	const unsigned int N = 128;
 	float *x, *y;
 
 	x = (float*)malloc(N*sizeof(float));
