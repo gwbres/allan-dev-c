@@ -31,7 +31,16 @@ float stdvar (float *x, unsigned int size)
 	return acc / (float)size;
 }
 
-void avar (float *x, float *y, unsigned int size, uint8_t is_fractionnal) 
+void avar (float *x, float *y, unsigned int size, uint8_t dtype, uint8_t axis) 
+{
+	if (dtype == AVAR_PHASE_DATA) {
+		avar_phase_data_pow2 (x, y, size);
+	} else {
+		avar_freq_data_pow2 (x, y, size);
+	}
+}
+
+void avar_freq_data_pow2 (float *x, float *y, unsigned int size)
 {
 	unsigned int i, j, k;
 	unsigned int clust_size; 
@@ -73,12 +82,7 @@ void avar (float *x, float *y, unsigned int size, uint8_t is_fractionnal)
 		acc = 0.f;
 		for (j=0; j < i-1; j++) // y(n+1) - y(n) must exist !!
 		{
-			if (is_fractionnal)
-			{
-				acc += powf(means[j+2] -2*means[j+1] + means[j], 2);
-			} else {
-				acc += powf(means[j+1] - means[j], 2); 
-			}
+			acc += powf(means[j+1] - means[j], 2); 
 		}
 
 		y[index] = acc / 2.0 / ((float)i-1.0); // normalization..
@@ -86,4 +90,36 @@ void avar (float *x, float *y, unsigned int size, uint8_t is_fractionnal)
 	}
 
 	free(means);
+}
+
+void avar_phase_data_pow2 (float *x, float *y, unsigned int size)
+{
+	unsigned int tau, i;
+
+	float acc = 0.f;
+
+	// tau=0: use all data points
+	acc = 0.f;
+	for (i=0; i < size-2; i++)
+	{ 
+		acc += powf(x[i+2] - 2*x[i+1] + x[i], 2); 
+	}
+
+	y[0] = acc / 2.0 / (float)(size-2.0); 
+	
+	for (tau=1; tau < size; tau *= 2) 
+	{
+		printf("tau: %d\n", tau); 
+
+		acc = 0.f;
+		for (i=tau; i < size/tau-2; i++)
+		{ 
+			acc += powf(x[tau*i+2] - 2*x[tau*i+1] + x[tau*i], 2); 
+		}
+
+		y[tau] = acc / 2.0 / (float)(size-2.0); 
+		y[tau] /= (float)tau;
+		y[tau] /= (float)tau;
+
+	}
 }

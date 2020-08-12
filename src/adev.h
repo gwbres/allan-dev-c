@@ -3,6 +3,14 @@
 
 #include <stdint.h>
 
+// TAU AXIS
+#define TAU_AXIS_POW2	0
+#define TAU_AXIS_POW10	1
+#define TAU_AXIS_ALL		2
+
+#define AVAR_PHASE_DATA	0
+#define AVAR_FREQ_DATA	1
+
 //////////////////////////////
 //       VARIANCEs         //
 ////////////////////////////
@@ -11,8 +19,15 @@
 //  returns Allan deviation
 //  float *x: input raw/fractionnal data
 //  unsigned int size: x array allocated size
-//  uint8_t is_fractionnal: set 0x01 if *x is fractionnal data
-void avar (float *x, float *y, unsigned int size, uint8_t is_fractionnal); 
+void avar (float *x, float *y, unsigned int size, uint8_t dtype, uint8_t axis); 
+
+void avar_phase_data (float *x, float *y, unsigned int size);
+void avar_phase_data_pow2 (float *x, float *y, unsigned int size);
+void avar_phase_data_pow10 (float *x, float *y, unsigned int size);
+
+void avar_freq_data (float *x, float *y, unsigned int size);
+void avar_freq_data_pow2 (float *x, float *y, unsigned int size);
+void avar_freq_data_pow10 (float *x, float *y, unsigned int size);
 
 // stdvar:
 //  returns standard variance

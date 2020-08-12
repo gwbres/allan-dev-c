@@ -8,7 +8,7 @@
 
 int main (int argc, char **argv)
 {
-	const unsigned int N = 128;
+	const unsigned int N = 64;
 	float *x, *y;
 
 	x = (float*)malloc(N*sizeof(float));
@@ -17,7 +17,7 @@ int main (int argc, char **argv)
 	randnf(x, N);
 	array2csv ("input.csv", x, N);
 
-	avar (x, y, N, 0x00); 
+	avar (x, y, N, AVAR_PHASE_DATA, TAU_AXIS_POW2); 
 	
 	array2csv ("output.csv", y, log2(N/2));
 	return 0;
