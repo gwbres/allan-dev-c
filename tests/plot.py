@@ -100,6 +100,7 @@ def main (argv):
 		taus = powers_of_two_axis (len(y))
 
 	elif tau_axis == 'decade':
+		print('prout')
 		taus = powers_of_ten_axis (len(y))
 
 	ax1.semilogx(taus, y, '+-', label='output')

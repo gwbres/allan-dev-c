@@ -25,9 +25,7 @@ void avar_phase_data (float *x, float *y, unsigned int size);
 void avar_phase_data_pow2 (float *x, float *y, unsigned int size);
 void avar_phase_data_pow10 (float *x, float *y, unsigned int size);
 
-void avar_freq_data (float *x, float *y, unsigned int size);
-void avar_freq_data_pow2 (float *x, float *y, unsigned int size);
-void avar_freq_data_pow10 (float *x, float *y, unsigned int size);
+void avar_freq_data (float *x, float *y, unsigned int size, uint8_t axis);
 
 // stdvar:
 //  returns standard variance

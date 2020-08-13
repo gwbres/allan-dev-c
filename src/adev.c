@@ -36,37 +36,44 @@ void avar (float *x, float *y, unsigned int size, uint8_t dtype, uint8_t axis)
 	if (dtype == AVAR_PHASE_DATA) {
 		avar_phase_data_pow2 (x, y, size);
 	} else {
-		avar_freq_data_pow2 (x, y, size);
+		avar_freq_data (x, y, size, axis);
 	}
 }
 
-void avar_freq_data_pow2 (float *x, float *y, unsigned int size)
+void avar_freq_data (float *x, float *y, unsigned int size, uint8_t axis)
 {
-	unsigned int i, j, k;
+	unsigned int i = 1, j, k;
 	unsigned int clust_size; 
 
 	float *means;
 	float acc = 0.f;
-
-	const unsigned int nb_max_clusters = size;
-
-	unsigned int index = (int)log2(size);
-
-	means = (float*)malloc(nb_max_clusters * sizeof(float));
+	
+	unsigned int index;
+	unsigned max_nb_of_clusters;
 
 	y[0] = stdvar(x, size); // y[tau=0] is always stdvar
 	
-	for (i=1; i <= size; i *= 2) 
-	{	// i <=> nb of clusters <=> 'tau' offset
-		// <!> tau axis: powers of 2!
-
+	// last index
+	if (axis == TAU_AXIS_POW2) {
+		index = (int)log2(size);
+		max_nb_of_clusters = (int)log2(size);
+	} else if (axis == TAU_AXIS_POW10) {
+		index = (int)log10(size);
+		max_nb_of_clusters = (int)log10(size);
+	} else {
+		index = size;
+		max_nb_of_clusters = size;
+	}
+		
+	means = (float*)malloc(max_nb_of_clusters * sizeof(float)); 
+	
+	while (i <= size)
+	{
+		// i: nb of clusters := tau offset
 		clust_size = size / i;
-
 		printf("n_clust: %d - clust_size: %d\n", i, clust_size);
 
-		// for each cluster of data
-		// compute statistical mean over cluster
-		// compute avar between statistical means
+		// compute statistical mean for each cluster 
 		for (j=0; j < i; j++)
 		{ 
 			acc = 0.f;
@@ -75,18 +82,23 @@ void avar_freq_data_pow2 (float *x, float *y, unsigned int size)
 				acc += x[k + j*clust_size];
 			} 
 		
-			means[j] = acc /(float)clust_size; // store mean for next calc.
+			means[j] = acc /(float)clust_size; // storage
 		}
 
 		// compute Allan var.
 		acc = 0.f;
-		for (j=0; j < i-1; j++) // y(n+1) - y(n) must exist !!
+		for (j=0; j < i-1; j++) // y(n+1) - y(n)!!
 		{
 			acc += powf(means[j+1] - means[j], 2); 
 		}
 
 		y[index] = acc / 2.0 / ((float)i-1.0); // normalization..
 		index--;
+
+		if (axis == TAU_AXIS_POW2)
+			i *= 2;
+		else
+			i *= 10; // powers of ten
 	}
 
 	free(means);
