@@ -7,32 +7,19 @@
 void tau_axis_pow2 (int *x, unsigned int size)
 {
 	unsigned int i;
-	for (i=0; i<size; i++)
+	x[0] = 1;
+	for (i=1; i<size; i++)
 	{
-		x[i] = (int)roundf(powf(2,i));
+		x[i] = x[i-1] * 2;
 	}
 }
 
 void tau_axis_pow10 (int *x, unsigned int size)
 {
 	unsigned int i;
-	for (i=0; i<size; i++)
+	x[0] = 1;
+	for (i=1; i<size; i++)
 	{
-		x[i] = (int)roundf(powf(10,i));
-	}
-}
-
-void tau_axis (int *x, unsigned size, uint8_t is_pow)
-{
-	unsigned int i;
-	if (is_pow & POWER2_TAU_AXIS)
-		tau_axis_pow2(x, size);
-
-	else if (is_pow & POWER10_TAU_AXIS)
-		tau_axis_pow10(x, size);
-	
-	else {
-		for (i=0; i<size; i++)
-			x[i] = i;
+		x[i] = x[i-1] * 10;
 	}
 }

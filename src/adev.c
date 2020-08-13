@@ -49,23 +49,19 @@ void avar_freq_data (float *x, float *y, unsigned int size, uint8_t axis)
 	float acc = 0.f;
 	
 	unsigned int index;
-	unsigned max_nb_of_clusters;
 
 	y[0] = stdvar(x, size); // y[tau=0] is always stdvar
 	
 	// last index
 	if (axis == TAU_AXIS_POW2) {
 		index = (int)log2(size);
-		max_nb_of_clusters = (int)log2(size);
 	} else if (axis == TAU_AXIS_POW10) {
 		index = (int)log10(size);
-		max_nb_of_clusters = (int)log10(size);
 	} else {
 		index = size;
-		max_nb_of_clusters = size;
 	}
 		
-	means = (float*)malloc(max_nb_of_clusters * sizeof(float)); 
+	means = (float*)malloc(size * sizeof(float)); 
 	
 	while (i <= size)
 	{
