@@ -7,20 +7,23 @@ SRC_DIR = ../src
 SRCS  = $(SRC_DIR)/adev.c
 SRCS += $(SRC_DIR)/tools/tools.c
 
-CFLAGS  = -I$(SRC_DIR)
+CFLAGS = -O3
+#CFLAGS += -mfloat-abi=hard
+CFLAGS += -I$(SRC_DIR)
 CFLAGS += -Wall
 CFLAGS += -lm
 
 all: tests 
 
-OBJS = $(SRCS:.c:=.o)
+OBJS = $(SRCS:.c=.o)
 
 %.o: %.c
 	$(CC) $(CFLAGS) -c $< -o $@ 
 
 tests: tests.c $(OBJS)
-	$(CC) $(CFLAGS) -o $@ $< $(SRCS)
+	$(CC) $(CFLAGS) $(OBJS) $< -o $@
 
 .PHONY: clean
 clean:
+	$(RM) $(OBJS)
 	$(RM) tests
