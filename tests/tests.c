@@ -8,11 +8,11 @@
 
 int main (int argc, char **argv)
 {
-	const unsigned int N = 64;
+	const unsigned int N = 128;
 	float *x, *y;
 
 	x = (float*)malloc(N*sizeof(float));
-	y = (float*)malloc(log2(N)*sizeof(float));
+	y = (float*)malloc(N*sizeof(float));
 
 	randnf(x, N);
 	array2csv ("input.csv", x, N);

@@ -94,32 +94,44 @@ void avar_freq_data_pow2 (float *x, float *y, unsigned int size)
 
 void avar_phase_data_pow2 (float *x, float *y, unsigned int size)
 {
-	unsigned int tau, i;
+	unsigned int tau = 1, i;
+	unsigned int index = 0;
 
-	float acc = 0.f;
+	float acc;
 
-	// tau=0: use all data points
-	acc = 0.f;
-	for (i=0; i < size-2; i++)
-	{ 
-		acc += powf(x[i+2] - 2*x[i+1] + x[i], 2); 
-	}
+/*
+    long i, n, stride;
+    double sum, v;
 
-	y[0] = acc / 2.0 / (float)(size-2.0); 
-	
-	for (tau=1; tau < size; tau *= 2) 
+    stride = ovlp ? 1 : tau;
+    sum = n = 0;
+    for (i = 0; (i + 2*tau) < count; i += stride) {
+        v = data[i + 2*tau] - 2 * data[i + tau] + data[i];
+        sum += v * v;
+        n += 1;
+    }
+    sum /= 2.0;
+
+    if (terms != NULL) { *terms = n; }
+    if (n < ADEV_MIN_SAMPLES) { return 0.0; }
+
+    return sqrt(sum / n) / tau;
+*/
+
+	while (tau < size)
 	{
-		printf("tau: %d\n", tau); 
-
 		acc = 0.f;
-		for (i=tau; i < size/tau-2; i++)
+		printf("tau: %d\n", tau);
+
+		for (i=0; i < size-2*tau; i += tau) // i+2tau exists
 		{ 
-			acc += powf(x[tau*i+2] - 2*x[tau*i+1] + x[tau*i], 2); 
+			acc += powf(x[i] - 2*x[i+tau] + x[i + 2*tau], 2); 
 		}
 
-		y[tau] = acc / 2.0 / (float)(size-2.0); 
-		y[tau] /= (float)tau;
-		y[tau] /= (float)tau;
+		y[index] = acc / 2.0; 
+		y[index] /= (float)tau;
+		index++;
 
+		tau *= 2; // pow2 axis
 	}
 }
