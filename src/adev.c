@@ -164,7 +164,10 @@ void avar_phase_data (float *x, float *y, unsigned int size, uint8_t axis, uint8
 		y[index] /= (float)tau; 
 		index++;
 
-		tau *= 2; // pow2 axis
+		if (axis == TAU_AXIS_POW2)
+			tau *= 2; // pow2 axis
+		else
+			tau *= 10; // pow10 axis
 	}
 }
 

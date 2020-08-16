@@ -50,15 +50,23 @@ def randf(n):
 
 def main (argv):
 
+	datatypes = ['phase','freq']
 	vartypes = ['avar','oavar']
-	tau_axis = None
+	tau_axis = ['twos', 'decade']
 
 	for arg in argv:
 		key = arg.split('=')[0]
 		value = arg.split('=')[1]
 
-		if key == 'taus':
-			tau_axis = value
+		if key == 'tau':
+			toKeep = value
+			toRemove = []
+			for i in range (0, len(tau_axis)):
+				if tau_axis[i] != toKeep:
+					toRemove.append(i)
+
+			for idx in toRemove[::-1]:
+				del tau_axis[idx]
 
 		elif key == 'var':
 			toKeep = value
@@ -70,11 +78,16 @@ def main (argv):
 			for idx in toRemove[::-1]:
 				del vartypes[idx]
 
-	# allantools options 
-	if not(tau_axis in [None, 'all','octave','decade']):
-		print('./plot.py taus=[all,octave,decade]')
-		return 0
-	
+		elif key == 'data':
+			toKeep = value
+			toRemove = []
+			for i in range (0, len(datatypes)):
+				if datatypes[i] != toKeep:
+					toRemove.append(i)
+
+			for idx in toRemove[::-1]:
+				del datatypes[idx]
+
 	# read input
 	x = readcsv("input.csv")
 	#x = allantools.noise.brown(16384, b2=1.0)
@@ -89,65 +102,55 @@ def main (argv):
 
 		print("VAR: {:s}".format(vartype))
 
-		for dtype in ['phase','freq']:
+		for dtype in datatypes: 
 
-			# generate model 
-			if vartype == 'avar':
-				if tau_axis == 'all':
-					(taus, ym, errors, ns) = allantools.adev(x, data_type=dtype, taus='all')
-				elif tau_axis == 'decade':
-					(taus, ym, errors, ns) = allantools.adev(x, data_type=dtype, taus='decade')
-				elif tau_axis == 'octave':
-					(taus, ym, errors, ns) = allantools.adev(x, data_type=dtype, taus='octave')
-				else:
-					(taus, ym, errors, ns) = allantools.adev(x, data_type=dtype)
+			for axis in tau_axis:
 
-			elif vartype == 'oavar':
-				if tau_axis == 'all':
-					(taus, ym, errors, ns) = allantools.oadev(x, data_type=dtype, taus='all')
-				elif tau_axis == 'decade':
-					(taus, ym, errors, ns) = allantools.oadev(x, data_type=dtype, taus='decade')
-				elif tau_axis == 'octave':
-					(taus, ym, errors, ns) = allantools.oadev(x, data_type=dtype, taus='octave')
-				else:
-					(taus, ym, errors, ns) = allantools.oadev(x, data_type=dtype)
+				# generate model 
+				if vartype == 'avar':
+					if axis == 'twos':
+						(taus, ym, errors, ns) = allantools.adev(x, data_type=dtype)
+					elif axis == 'decade':
+						(taus, ym, errors, ns) = allantools.adev(x, data_type=dtype, taus='decade')
 
-			ym = np.power(ym, 2) # adev compared to avar
-			ym = 20 * np.log10(ym)
-			ax1.semilogx(taus, ym, '+-', label="{:s} '{:s}' model".format(vartype, dtype))
+				elif vartype == 'oavar':
+					if axis == 'twos':
+						(taus, ym, errors, ns) = allantools.oadev(x, data_type=dtype)
+					elif axis == 'decade':
+						(taus, ym, errors, ns) = allantools.oadev(x, data_type=dtype, taus='decade')
+
+				ym = np.power(ym, 2) # adev compared to avar
+				ym = 20 * np.log10(ym)
+				ax1.semilogx(taus, ym, '+-', label="{:s} '{:s}' {:s} model".format(vartype, dtype, axis))
 			
-			# output
-			y = readcsv("{:s}-{:s}.csv".format(vartype, dtype)) 
-			y = 20 * np.log10(y) 
+				# output
+				y = readcsv("{:s}-{:s}-{:s}.csv".format(
+					vartype, 
+					dtype,
+					axis
+				))
 
-			if tau_axis == None:
-				taus = powers_of_two_axis (len(y))
+				y = 20 * np.log10(y) 
 
-			elif tau_axis == 'decade':
-				taus = powers_of_ten_axis (len(y))
-			
-			else:
-				taus = np.linspace(0,len(y),len(y),dtype='int') 
+				ax1.semilogx(taus, y, '+', label="{:s} '{:s}' {:s}".format(vartype, dtype, axis))
+				ax1.legend(loc='best')
 
-			ax1.semilogx(taus, y, '+', label="{:s} '{:s}'".format(vartype, dtype))
-			ax1.legend(loc='best')
+				# tb
+				error = 0
+				max_tol = 0.01
 
-			# tb
-			error = 0
-			max_tol = 0.01
+				print("-------- {:s} test -------".format(dtype))
+				for i in range (0, min(len(ym),len(y))):
+					e = abs(y[i] - ym[i])
+					if e > max_tol:
+						error += 1
+						print("tau: {:d} error: {:.3e} dB".format(int(taus[i]), e))
 
-			print("-------- {:s} test -------".format(dtype))
-			for i in range (0, min(len(ym),len(y))):
-				e = abs(y[i] - ym[i])
-				if e > max_tol:
-					error += 1
-					print("tau: {:d} error: {:.3e} dB".format(taus[i], e))
-
-			if error > 0:
-				print("failed")
-			else:
-				print("passed")
-			print("---------------------")
+				if error > 0:
+					print("failed")
+				else:
+					print("passed")
+				print("---------------------")
 			
 	plt.show()
 		
