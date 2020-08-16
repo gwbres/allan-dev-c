@@ -48,6 +48,27 @@ def randf(n):
 		result.append(np.random.randint(0,high=100)/100)
 	return result
 
+def testbench (title, tau, y, ym, toldB=1e-6):
+	print(" ####### {:s} ######## ".format(title))
+	max_digits_tau = int(np.log10(max(tau)))
+	tau_format = '{:'+str(max_digits_tau+1)+'}'
+	for i in range (0, min(len(y),len(ym))):
+		string = 'tau ' + tau_format.format(int(tau[i])) + ' | '
+		
+		error = abs(y[i] - ym[i])
+		string += 'error {:10.3e} dB | '.format(error)
+
+		string += '\033[1m' # BOLD
+		if error > toldB:
+			string += '\033[91m' # RED
+			string += u'ERROR  \U0001F5F7'
+		else:
+			string += '\033[92m' # GREEN
+			string += u'PASSED \U0001F5F9'
+
+		string += '\033[0m' # ENDC
+		print(string)
+
 def main (argv):
 
 	datatypes = ['phase','freq']
@@ -99,11 +120,7 @@ def main (argv):
 	plt.grid(True)
 
 	for vartype in vartypes: 
-
-		print("VAR: {:s}".format(vartype))
-
 		for dtype in datatypes: 
-
 			for axis in tau_axis:
 
 				# generate model 
@@ -135,23 +152,9 @@ def main (argv):
 				ax1.semilogx(taus, y, '+', label="{:s} '{:s}' {:s}".format(vartype, dtype, axis))
 				ax1.legend(loc='best')
 
-				# tb
-				error = 0
-				max_tol = 0.01
+				title = 'variance: {:s} - axis: {:s} - data: {:s}'.format(vartype, axis, dtype) 
+				testbench (title, taus, y, ym, toldB=1e-4)
 
-				print("-------- {:s} test -------".format(dtype))
-				for i in range (0, min(len(ym),len(y))):
-					e = abs(y[i] - ym[i])
-					if e > max_tol:
-						error += 1
-						print("tau: {:d} error: {:.3e} dB".format(int(taus[i]), e))
-
-				if error > 0:
-					print("failed")
-				else:
-					print("passed")
-				print("---------------------")
-			
 	plt.show()
 		
 if __name__ == "__main__":
