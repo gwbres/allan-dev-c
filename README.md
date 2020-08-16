@@ -1,40 +1,41 @@
 # Allan Deviation C Tools 
 
-This is a light collection of C functions,
-to compute Allan & derived statistics.
+This is a light collection of C functions, to compute Allan variances & related statistics.
 
-These statistics are used in several fields:
+These statistics are used in several fields & situations:
 
-+ Measure & study the stability 
-of a signal or a reference signal
-(beat signal, clock signal, reference signal..)
++ to measure & study the stability of a signal over time
 
-+ Statistics of sensors data, or fractions
-of errors compared to a reference
++ compare a signal to a reference signal
 
-+ Determine the power law fitting
-a distribution (Gyroscope, accelerometer calibrations,
-noise distributions against time, ...)
++ Study the stability & behavior of sensors like a Gyroscope (angle sensor) and Accelerometer (g sensor)
 
-+ Compare references to each other
-(so called "3 cornered hat").
+against time (transfer function over time)
 
 ## Learn from this project
 
-+ How to compute ADEV, MDEV, ODEV.. all variations
-of the Allan deviation
-+ ADEV, MDEV plot analysis 
++ How to compute the Allan variance and other modern flavors 
+  + like MDEV: Modified Allan Deviation
+  + OADEV: Overlapped Allan Deviation
++ Determine which variance to use and why, depending on the situation
++ Analyze & use a variance plot (variance against time constants)
 
 ## Documentation
 
 Refer to the project documentation:
 
 ```bash
-xpdf $git/doc/documentation.pdf
+xpdf allan-dev-c-tools/doc/documentation.pdf
 ```
 
 ## Getting started
 
 ```bash
 TODO
+```
+
+Run the test / benchmarks
+
+```
+make -C allan-dev-c-tools/tests
 ```
