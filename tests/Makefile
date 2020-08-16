@@ -27,3 +27,4 @@ tests: tests.c $(OBJS)
 clean:
 	$(RM) $(OBJS)
 	$(RM) tests
+	$(RM) *.csv
