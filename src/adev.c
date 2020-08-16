@@ -36,16 +36,25 @@ float stddev (float *x, unsigned int size)
 	return sqrtf(stdvar(x, size));
 }
 
-void avar (float *x, float *y, unsigned int size, uint8_t dtype, uint8_t axis) 
+void avar (float *x, float *y, unsigned int size, uint8_t dtype, uint8_t axis)
 {
 	if (dtype == AVAR_PHASE_DATA) {
-		avar_phase_data (x, y, size);
+		avar_phase_data (x, y, size, axis, 0x00);
 	} else {
-		avar_freq_data (x, y, size, axis);
+		avar_freq_data (x, y, size, axis, 0x00);
 	}
 }
 
-void avar_freq_data (float *x, float *y, unsigned int size, uint8_t axis)
+void oavar (float *x, float *y, unsigned int size, uint8_t dtype, uint8_t axis)
+{
+	if (dtype == AVAR_PHASE_DATA) {
+		avar_phase_data (x, y, size, axis, 0x01);
+	} else {
+		avar_freq_data (x, y, size, axis, 0x01);
+	}
+}
+
+void avar_freq_data (float *x, float *y, unsigned int size, uint8_t axis, uint8_t overlapping)
 {
 	unsigned int i = 1, j, k;
 	unsigned int clust_size; 
@@ -74,7 +83,7 @@ void avar_freq_data (float *x, float *y, unsigned int size, uint8_t axis)
 		clust_size = size / i;
 		printf("n_clust: %d - clust_size: %d\n", i, clust_size);
 
-		// compute statistical mean for each cluster 
+		// compute statistical mean of each cluster 
 		for (j=0; j < i; j++)
 		{ 
 			acc = 0.f;
@@ -105,9 +114,10 @@ void avar_freq_data (float *x, float *y, unsigned int size, uint8_t axis)
 	free(means);
 }
 
-void avar_phase_data (float *x, float *y, unsigned int size)
+void avar_phase_data (float *x, float *y, unsigned int size, uint8_t axis, uint8_t overlapping)
 {
 	unsigned int tau = 1, i;
+	unsigned int stride;
 	unsigned int index = 0;
 
 	float acc;
@@ -136,7 +146,15 @@ void avar_phase_data (float *x, float *y, unsigned int size)
 		acc = 0.f;
 		printf("tau: %d\n", tau);
 
-		for (i=0; i < size-2*tau; i += tau) // i+2tau exists
+		if (overlapping)
+		{
+			stride = 1;
+		} else 
+		{
+			stride = tau;
+		}
+
+		for (i=0; i < size; i += stride) // i+2tau exists
 		{ 
 			acc += powf(x[i+2*tau] - 2*x[i+tau] + x[i], 2); 
 		}
@@ -150,17 +168,49 @@ void avar_phase_data (float *x, float *y, unsigned int size)
 	}
 }
 
-void adev (float *x, float *y, unsigned int size, uint8_t dtype, uint8_t axis) 
+void adev (float *x, float *y, unsigned int size, uint8_t dtype, uint8_t axis)
 {
 	unsigned int i, nb_symbols;
 
 	// perform desired AVAR calculation
 	if (dtype == AVAR_PHASE_DATA)
 	{
-		avar_phase_data (x, y, size);
+		avar_phase_data (x, y, size, axis, 0x00);
 	} else 
 	{
-		avar_freq_data (x, y, size, axis);
+		avar_freq_data (x, y, size, axis, 0x00);
+	}
+	
+	// convert each output symbol to deviation
+	if (axis == TAU_AXIS_POW2)
+	{
+		nb_symbols = (int)log2(size)+1;
+	} 
+	else if (axis == TAU_AXIS_POW10)
+	{
+		nb_symbols = (int)log10(size)+1;
+	} else
+	{
+		nb_symbols = size;
+	}
+
+	for (i=0; i < nb_symbols; i++)
+	{
+		y[i] = sqrt(y[i]);
+	}
+}
+
+void oadev (float *x, float *y, unsigned int size, uint8_t dtype, uint8_t axis)
+{
+	unsigned int i, nb_symbols;
+
+	// perform desired AVAR calculation
+	if (dtype == AVAR_PHASE_DATA)
+	{
+		avar_phase_data (x, y, size, axis, 0x01);
+	} else 
+	{
+		avar_freq_data (x, y, size, axis, 0x01);
 	}
 	
 	// convert each output symbol to deviation

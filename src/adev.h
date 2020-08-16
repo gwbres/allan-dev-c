@@ -29,14 +29,40 @@
 //    TAU_AXIS_POW2: compute AVAR for tau in powers of two (faster)
 //    TAU_AXIS_POW10: compute AVAR for tau in powers of ten (faster)
 //    TAU_AXIS_ALL: compute AVAR for all possible tau values 
-void avar (float *x, float *y, unsigned int size, uint8_t dtype, uint8_t axis); 
+void avar (float *x, float *y, unsigned int size, uint8_t dtype, uint8_t axis);
+
+// oavar()
+//  returns Allan deviation
+//  float *x: input data
+//  unsigned int size: x array allocated size
+// 
+//  uint8_t dtype:
+//    1: AVAR_PHASE_DATA: use this value for raw data (raw phase, raw sensor..)
+//    2: AVAR_FREQ_DATA: use this value for fractionnal data (delta f /f) 
+//
+//  uint8_t axis:
+//    tau axis configuration, 
+//    TAU_AXIS_POW2: compute AVAR for tau in powers of two (faster)
+//    TAU_AXIS_POW10: compute AVAR for tau in powers of ten (faster)
+//    TAU_AXIS_ALL: compute AVAR for all possible tau values 
+void oavar (float *x, float *y, unsigned int size, uint8_t dtype, uint8_t axis);
 
 // avar_phase_data()
 //  returns Allan deviation, intended to be used against raw data (radians, angles..)
 //  float *x: input data
 //  unsigned int size: x array allocated size
 //  float *y: output
-void avar_phase_data (float *x, float *y, unsigned int size);
+//
+//  uint8_t axis:
+//    tau axis configuration, 
+//    TAU_AXIS_POW2: compute AVAR for tau in powers of two (faster)
+//    TAU_AXIS_POW10: compute AVAR for tau in powers of ten (faster)
+//    TAU_AXIS_ALL: compute AVAR for all possible tau values 
+//
+//  uint8_t overlapping
+//   0x00: disable overlapping (= AVAR)
+//   0x01: enable overlapping  (= OAVAR)
+void avar_phase_data (float *x, float *y, unsigned int size, uint8_t axis, uint8_t overlapping);
 
 // avar_freq_data()
 //  returns Allan deviation, intended to be used against fractionnal data (fractionnal frequency..)
@@ -49,7 +75,7 @@ void avar_phase_data (float *x, float *y, unsigned int size);
 //    TAU_AXIS_POW2: compute AVAR for tau in powers of two (faster)
 //    TAU_AXIS_POW10: compute AVAR for tau in powers of ten (faster)
 //    TAU_AXIS_ALL: compute AVAR for all possible tau values 
-void avar_freq_data (float *x, float *y, unsigned int size, uint8_t axis);
+void avar_freq_data (float *x, float *y, unsigned int size, uint8_t axis, uint8_t overlapping);
 
 ///////////////////////////////
 //       DEVIATIONs         //
@@ -59,6 +85,11 @@ void avar_freq_data (float *x, float *y, unsigned int size, uint8_t axis);
 // returns sqrt(avar())
 // it is more efficient to call avar() and perform sqrt() in post processing
 void adev (float *x, float *y, unsigned int size, uint8_t dtype, uint8_t axis);
+
+// oadev()
+// returns sqrt(avar())
+// it is more efficient to call avar() and perform sqrt() in post processing
+void oadev (float *x, float *y, unsigned int size, uint8_t dtype, uint8_t axis);
 
 //////////////////////////
 //       OTHER         //

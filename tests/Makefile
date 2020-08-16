@@ -13,18 +13,24 @@ CFLAGS += -I$(SRC_DIR)
 CFLAGS += -Wall
 CFLAGS += -lm
 
-all: tests 
+all: avar oavar #mvar
 
 OBJS = $(SRCS:.c=.o)
 
 %.o: %.c
 	$(CC) $(CFLAGS) -c $< -o $@ 
 
-tests: tests.c $(OBJS)
+avar: avar.c $(OBJS)
+	$(CC) $(CFLAGS) $(OBJS) $< -o $@
+
+oavar: oavar.c $(OBJS)
+	$(CC) $(CFLAGS) $(OBJS) $< -o $@
+
+mvar: mvar.c $(OBJS)
 	$(CC) $(CFLAGS) $(OBJS) $< -o $@
 
 .PHONY: clean
 clean:
 	$(RM) $(OBJS)
-	$(RM) tests
+	$(RM) avar oavar mvar
 	$(RM) *.csv

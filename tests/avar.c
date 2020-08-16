@@ -41,9 +41,9 @@ int main (int argc, char **argv)
 	avar (x, y, N, AVAR_PHASE_DATA, axis);
 
 	if (axis == TAU_AXIS_POW2)
-		array2csv ("avar-phase.csv", y, log2(N)-1);
+		array2csv ("avar-phase.csv", y, (int)log2(N)-1);
 	else if (axis == TAU_AXIS_POW10)
-		array2csv ("avar-phase.csv", y, log10(N)-1);
+		array2csv ("avar-phase.csv", y, (int)log10(N)-1);
 
 	free(x);
 	free(y);
