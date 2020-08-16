@@ -36,11 +36,10 @@ int array2csv (const char *fp, float *array, unsigned int size)
 		return -1;
 	}
 
-	for (i=0; i<size; i++)
+	for (i=0; i<size-1; i++)
 	{
 		fprintf(fd, "%.6e,",array[i]);
-	}
-	fprintf(fd, "%.6e", array[i]);
+	} fprintf(fd, "%.6e", array[i]);
 
 	fclose(fd);
 	return 0;

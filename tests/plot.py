@@ -56,7 +56,7 @@ def main (argv):
 		key = arg.split('=')[0]
 		value = arg.split('=')[1]
 
-		if key == 'tau':
+		if key == 'taus':
 			tau_axis = value
 
 	# allantools options 
@@ -68,7 +68,6 @@ def main (argv):
 	x = readcsv("input.csv")
 	#x = allantools.noise.brown(16384, b2=1.0)
 	#x = allantools.noise.white(16384*100) # b2=1.0)
-	#x = randf(16384*10)
 	
 	# gui
 	fig = plt.figure()
@@ -77,17 +76,22 @@ def main (argv):
 
 	for dtype in ['phase','freq']:
 
-		# compute using model
-		(taus, adevs, errors, ns) = allantools.adev(x, data_type=dtype, taus=tau_axis)
-	
-		# model
-		ym = adevs
-		ym = np.power(ym, 2)
+		# generate model 
+		if tau_axis == 'all':
+			(taus, ym, errors, ns) = allantools.adev(x, data_type=dtype, taus='all')
+		elif tau_axis == 'decade':
+			(taus, ym, errors, ns) = allantools.adev(x, data_type=dtype, taus='decade')
+		elif tau_axis == 'octave':
+			(taus, ym, errors, ns) = allantools.adev(x, data_type=dtype, taus='octave')
+		else:
+			(taus, ym, errors, ns) = allantools.adev(x, data_type=dtype)
+
+		ym = np.power(ym, 2) # adev compared to avar
 		ym = 20 * np.log10(ym)
-		ax1.semilogx(taus, ym, '-', label='{:s} model'.format(dtype))
+		ax1.semilogx(taus, ym, '+-', label="AVAR '{:s}' model".format(dtype))
 		
 		# output
-		y = readcsv("{:s}.csv".format(dtype)) 
+		y = readcsv("avar-{:s}.csv".format(dtype)) 
 		y = 20 * np.log10(y) 
 
 		if tau_axis == None:
@@ -95,8 +99,11 @@ def main (argv):
 
 		elif tau_axis == 'decade':
 			taus = powers_of_ten_axis (len(y))
+		
+		else:
+			taus = np.linspace(0,len(y),len(y),dtype='int') 
 
-		ax1.semilogx(taus, y, '+', label='{:s} output'.format(dtype))
+		ax1.semilogx(taus, y, '+', label="AVAR '{:s}'".format(dtype))
 		ax1.legend(loc='best')
 
 		# tb

@@ -15,53 +15,69 @@
 //       VARIANCEs         //
 ////////////////////////////
 
-// avar:
+// avar()
 //  returns Allan deviation
-//  float *x: input raw/fractionnal data
+//  float *x: input data
 //  unsigned int size: x array allocated size
+// 
+//  uint8_t dtype:
+//    1: AVAR_PHASE_DATA: use this value for raw data (raw phase, raw sensor..)
+//    2: AVAR_FREQ_DATA: use this value for fractionnal data (delta f /f) 
+//
+//  uint8_t axis:
+//    tau axis configuration, 
+//    TAU_AXIS_POW2: compute AVAR for tau in powers of two (faster)
+//    TAU_AXIS_POW10: compute AVAR for tau in powers of ten (faster)
+//    TAU_AXIS_ALL: compute AVAR for all possible tau values 
 void avar (float *x, float *y, unsigned int size, uint8_t dtype, uint8_t axis); 
 
+// avar_phase_data()
+//  returns Allan deviation, intended to be used against raw data (radians, angles..)
+//  float *x: input data
+//  unsigned int size: x array allocated size
+//  float *y: output
 void avar_phase_data (float *x, float *y, unsigned int size);
-void avar_phase_data_pow2 (float *x, float *y, unsigned int size);
-void avar_phase_data_pow10 (float *x, float *y, unsigned int size);
 
+// avar_freq_data()
+//  returns Allan deviation, intended to be used against fractionnal data (fractionnal frequency..)
+//  float *x: input data
+//  unsigned int size: x array allocated size
+//  float *y: output
+//
+//  uint8_t axis:
+//    tau axis configuration, 
+//    TAU_AXIS_POW2: compute AVAR for tau in powers of two (faster)
+//    TAU_AXIS_POW10: compute AVAR for tau in powers of ten (faster)
+//    TAU_AXIS_ALL: compute AVAR for all possible tau values 
 void avar_freq_data (float *x, float *y, unsigned int size, uint8_t axis);
 
-// stdvar:
-//  returns standard variance
-//  float *x: input data
-//  unsigned int size: *x allocated size
-float stdvar (float *x, unsigned int size);
+///////////////////////////////
+//       DEVIATIONs         //
+/////////////////////////////
 
-//////////////////////////////
-//       DEVIATIONs        //
-////////////////////////////
+// adev()
+// returns sqrt(avar())
+// it is more efficient to call avar() and perform sqrt() in post processing
+void adev (float *x, float *y, unsigned int size, uint8_t dtype, uint8_t axis);
 
-// adev:
-//  returns Allan deviation
-//  float *x: input raw/fractionnal data
-//  unsigned int size: x array allocated size
-//  uint8_t is_fractionnal: set 0x01 if *x is fractionnal data
-void adev (float *x, float *y, unsigned int size, uint8_t is_fractionnal);
+//////////////////////////
+//       OTHER         //
+////////////////////////
 
-// stddev
-//  returns standard deviation 
-//  float *x: input data
-//  unsigned int size: x array allocated size
-float stddev (float *x, unsigned int size);
-
-//////////////////////////////////////////////////////////////////
-
-// mean:
+// mean()
 //  returns mean of *x data set
 float mean (float *x, unsigned size);
 
-// split:
-//  splits *x array into **y subsets
-void split (float *x, float **y, unsigned int n_clusters, unsigned int clust_size);
+// stdvar()
+//  returns standard variance of *x data serie
+//  float *x: input data
+//  unsigned int size: *x array size 
+float stdvar (float *x, unsigned int size);
 
-// avar_calc
-//  returns AVAR() for input clusters **x 
-float avar_calc (float **x, unsigned int n_clusters, unsigned int clust_size, uint8_t fractionnal);
+// stddev()
+//  returns standard deviation of *x data serie
+//  float *x: input data
+//  unsigned int size: *x array size 
+float stddev (float *x, unsigned int size);
 
 #endif

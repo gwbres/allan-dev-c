@@ -31,10 +31,15 @@ float stdvar (float *x, unsigned int size)
 	return acc / (float)size;
 }
 
+float stddev (float *x, unsigned int size)
+{
+	return sqrtf(stdvar(x, size));
+}
+
 void avar (float *x, float *y, unsigned int size, uint8_t dtype, uint8_t axis) 
 {
 	if (dtype == AVAR_PHASE_DATA) {
-		avar_phase_data_pow2 (x, y, size);
+		avar_phase_data (x, y, size);
 	} else {
 		avar_freq_data (x, y, size, axis);
 	}
@@ -100,7 +105,7 @@ void avar_freq_data (float *x, float *y, unsigned int size, uint8_t axis)
 	free(means);
 }
 
-void avar_phase_data_pow2 (float *x, float *y, unsigned int size)
+void avar_phase_data (float *x, float *y, unsigned int size)
 {
 	unsigned int tau = 1, i;
 	unsigned int index = 0;
@@ -133,13 +138,46 @@ void avar_phase_data_pow2 (float *x, float *y, unsigned int size)
 
 		for (i=0; i < size-2*tau; i += tau) // i+2tau exists
 		{ 
-			acc += powf(x[i] - 2*x[i+tau] + x[i + 2*tau], 2); 
+			acc += powf(x[i+2*tau] - 2*x[i+tau] + x[i], 2); 
 		}
 
-		y[index] = acc / 2.0; 
-		y[index] /= (float)tau;
+		y[index] = acc / 2.0 / ((float)size-1.0); 
+		y[index] /= (float)tau; 
+		y[index] /= (float)tau; 
 		index++;
 
 		tau *= 2; // pow2 axis
+	}
+}
+
+void adev (float *x, float *y, unsigned int size, uint8_t dtype, uint8_t axis) 
+{
+	unsigned int i, nb_symbols;
+
+	// perform desired AVAR calculation
+	if (dtype == AVAR_PHASE_DATA)
+	{
+		avar_phase_data (x, y, size);
+	} else 
+	{
+		avar_freq_data (x, y, size, axis);
+	}
+	
+	// convert each output symbol to deviation
+	if (axis == TAU_AXIS_POW2)
+	{
+		nb_symbols = (int)log2(size)+1;
+	} 
+	else if (axis == TAU_AXIS_POW10)
+	{
+		nb_symbols = (int)log10(size)+1;
+	} else
+	{
+		nb_symbols = size;
+	}
+
+	for (i=0; i < nb_symbols; i++)
+	{
+		y[i] = sqrt(y[i]);
 	}
 }
