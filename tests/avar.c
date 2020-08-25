@@ -29,8 +29,8 @@ int main (int argc, char **argv)
 	array2csv ("avar-freq-decade.csv", y, (int)log10(N)-1);
 
 	// tau='all'
-	avar (x, y, N, AVAR_FREQ_DATA, TAU_AXIS_ALL);
-	array2csv ("avar-freq-all.csv", y, N);
+	//avar (x, y, N, AVAR_FREQ_DATA, TAU_AXIS_ALL);
+	//array2csv ("avar-freq-all.csv", y, N);
 
 	printf("######### AVAR (phase data) ###########\n");
 
@@ -43,8 +43,8 @@ int main (int argc, char **argv)
 	array2csv ("avar-phase-decade.csv", y, (int)log10(N)-1);
 
 	// tau='all'
-	avar (x, y, N, AVAR_PHASE_DATA, TAU_AXIS_ALL);
-	array2csv ("avar-phase-all.csv", y, N);
+	//avar (x, y, N, AVAR_PHASE_DATA, TAU_AXIS_ALL);
+	//array2csv ("avar-phase-all.csv", y, N);
 
 	free(x);
 	free(y);

@@ -2,9 +2,11 @@
 
 import sys
 
-import allantools
+import math
 import numpy as np
 import matplotlib.pyplot as plt
+
+import allantools
 
 def readcsv (fp):
 	results = []
@@ -15,18 +17,18 @@ def readcsv (fp):
 				results.append(float(item))
 	return results
 
-def powers_of_two_axis (N):
+def tau_powers_of_two (N):
 	tau = []
 	index = 1
-	for i in range (0, N):
+	for i in range (0, N): 
 		tau.append(index)
 		index *= 2 
 	return tau
 
-def powers_of_ten_axis (N):
+def tau_powers_of_ten (N):
 	tau = []
 	index = 1
-	for i in range (0, N):
+	for i in range (0, N): 
 		tau.append(index)
 		index *= 10
 	return tau
@@ -109,10 +111,7 @@ def main (argv):
 			for idx in toRemove[::-1]:
 				del datatypes[idx]
 
-	# read input
-	x = readcsv("input.csv")
-	#x = allantools.noise.brown(16384, b2=1.0)
-	#x = allantools.noise.white(16384*100) # b2=1.0)
+	x = readcsv("input.csv") # read input
 	
 	# gui
 	fig = plt.figure()
@@ -149,11 +148,16 @@ def main (argv):
 
 				y = 20 * np.log10(y) 
 
+				#if axis == 'twos':
+				#	taus = tau_powers_of_two(len(y)) 
+				#elif axis == 'decade':
+				#	taus = tau_powers_of_ten(len(y)) 
+
 				ax1.semilogx(taus, y, '+', label="{:s} '{:s}' {:s}".format(vartype, dtype, axis))
 				ax1.legend(loc='best')
 
 				title = 'variance: {:s} - axis: {:s} - data: {:s}'.format(vartype, axis, dtype) 
-				testbench (title, taus, y, ym, toldB=1e-4)
+				testbench (title, taus, y, ym, toldB=1e-2)
 
 	plt.show()
 		

@@ -7,28 +7,28 @@
 float mean (float *x, unsigned int size)
 {
 	unsigned int i;
-	float acc = 0.f;
+	float sum = 0.f;
 	for (i=0; i<size; i++)
 	{
-		acc += x[i];
+		sum += x[i];
 	}
 
-	return acc / (float)size;
+	return sum / (float)size;
 }
 
 float stdvar (float *x, unsigned int size)
 {
 	unsigned int i;
 	
-	float acc = 0.f;
+	float sum = 0.f;
 	float m = mean(x, size);
 	
 	for (i=0; i<size; i++)
 	{
-		acc += powf(x[i] - m, 2); 	
+		sum += powf(x[i] - m, 2); 	
 	}
 
-	return acc / (float)size;
+	return sum / (float)size;
 }
 
 float stddev (float *x, unsigned int size)
@@ -60,7 +60,7 @@ void avar_freq_data (float *x, float *y, unsigned int size, uint8_t axis, uint8_
 	unsigned int clust_size; 
 
 	float *means;
-	float acc = 0.f;
+	float sum = 0.f;
 	
 	unsigned int index;
 
@@ -86,24 +86,24 @@ void avar_freq_data (float *x, float *y, unsigned int size, uint8_t axis, uint8_
 		// compute statistical mean of each cluster 
 		for (j=0; j < i; j++)
 		{ 
-			acc = 0.f;
+			sum = 0.f;
 			for (k=0; k < clust_size; k++)
 			{
-				acc += x[k + j*clust_size];
+				sum += x[k + j*clust_size];
 			} 
 		
-			means[j] = acc /(float)clust_size; // storage
+			means[j] = sum /(float)clust_size;
 		}
 
-		// compute Allan var.
-		acc = 0.f;
+		// compute Allan var. from statistical means
+		sum = 0.f;
 		for (j=0; j < i-1; j++) // y(n+1) - y(n)!!
 		{
-			acc += powf(means[j+1] - means[j], 2); 
+			sum += powf(means[j+1] - means[j], 2); 
 		}
 
-		y[index] = acc / 2.0 / ((float)i-1.0); // normalization..
-		index--;
+		// assign sample
+		y[index--] = sum / 2.0 / ((float)i-1.0); // normalization..
 
 		if (axis == TAU_AXIS_POW2)
 			i *= 2;
@@ -116,58 +116,36 @@ void avar_freq_data (float *x, float *y, unsigned int size, uint8_t axis, uint8_
 
 void avar_phase_data (float *x, float *y, unsigned int size, uint8_t axis, uint8_t overlapping)
 {
-	unsigned int tau = 1, i;
-	unsigned int stride;
+	unsigned int tau = 1;
+	unsigned int i;
 	unsigned int index = 0;
 
-	float acc;
+	float sum;
 
-/*
-    long i, n, stride;
-    double sum, v;
-
-    stride = ovlp ? 1 : tau;
-    sum = n = 0;
-    for (i = 0; (i + 2*tau) < count; i += stride) {
-        v = data[i + 2*tau] - 2 * data[i + tau] + data[i];
-        sum += v * v;
-        n += 1;
-    }
-    sum /= 2.0;
-
-    if (terms != NULL) { *terms = n; }
-    if (n < ADEV_MIN_SAMPLES) { return 0.0; }
-
-    return sqrt(sum / n) / tau;
-*/
-
-	while (tau < size)
+	while (tau < size/2) // pb quand tau est grand
 	{
-		acc = 0.f;
+		sum = 0.f;
 		printf("tau: %d\n", tau);
 
-		if (overlapping)
-		{
-			stride = 1;
-		} else 
-		{
-			stride = tau;
-		}
+		//if (overlapping) stride = 1;
+		//else stride = tau;
 
-		for (i=0; i < size; i += stride) // i+2tau exists
+		for (i=0; (i+2*tau) < size; i += tau) // i+2tau exists
 		{ 
-			acc += powf(x[i+2*tau] - 2*x[i+tau] + x[i], 2); 
+			sum += powf(x[i+2*tau] - 2*x[i+tau] + x[i], 2); 
 		}
 
-		y[index] = acc / 2.0 / ((float)size-1.0); 
+		// assign sample
+		y[index] = sum / 2.0 / ((float)size); 
 		y[index] /= (float)tau; 
-		y[index] /= (float)tau; 
-		index++;
+		//y[index] /= (float)tau; 
 
 		if (axis == TAU_AXIS_POW2)
 			tau *= 2; // pow2 axis
 		else
 			tau *= 10; // pow10 axis
+		
+		index++;
 	}
 }
 
